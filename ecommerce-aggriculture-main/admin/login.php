@@ -1,0 +1,126 @@
+<?php include("../inc/connect.inc.php"); ?>
+
+<?php
+ob_start();
+session_start();
+if (!isset($_SESSION['admin_login'])) {
+} else {
+	header("location: index.php");
+}
+
+if (isset($_POST['login'])) {
+	if (isset($_POST['email']) && isset($_POST['password'])) {
+		$user_login = mysqli_real_escape_string($mysqlCon, $_POST['email']);
+		$user_login = mb_convert_case($user_login, MB_CASE_LOWER, "UTF-8");
+		$password_login = mysqli_real_escape_string($mysqlCon, $_POST['password']);
+		$num = 0;
+		$password_login_md5 = md5($password_login);
+		$result = mysqli_query($mysqlCon, "SELECT * FROM admin WHERE (email='$user_login') AND password='$password_login_md5'");
+		$num = mysqli_num_rows($result);
+		$get_user_email = mysqli_fetch_assoc($result);
+		$get_user_uname_db = $get_user_email['id'];
+		if ($num > 0) {
+			$_SESSION['admin_login'] = $get_user_uname_db;
+			setcookie('admin_login', $user_login, time() + (365 * 24 * 60 * 60), "/");
+			header('location: index.php');
+			exit();
+		} else {
+			$error_message = '<br><br>
+				<div class="maincontent_text" style="text-align: center; font-size: 18px;">
+				<font face="bookman">Username or Password incorrect.<br>
+				</font></div>';
+		}
+	}
+}
+
+$search_value = "";
+
+?>
+
+<!doctype html>
+<html>
+
+<head>
+	<title>eBuyAgree</title>
+
+	<link rel="stylesheet" type="text/css" href="../css/style.css">
+</head>
+
+<body class="home-welcome-text" style="background: linear-gradient(rgba(0, 0, 0, .7), rgba(0, 0, 0, .7)), url(../image/homebackgrndimg1.png);">
+	<div class="homepageheader">
+		<div class="signinButton loginButton">
+			<div class="uiloginbutton signinButton loginButton" style="margin-right: 40px;">
+				<a style="text-decoration: none;" href="login.php">LOG IN</a>
+			</div>
+		</div>
+		<div style="float: left; margin: 5px 0px 0px 23px;">
+			<a href="index.php">
+				<img style=" height: 75px; width: 130px;" src="../image/ebuybdlogo.png">
+			</a>
+		</div>
+		<div id="srcheader" style="display:none">
+			<form id="newsearch" method="get" action="search.php">
+				<?php
+				echo '<input autocomplete="off" type="text" class="srctextinput" name="keywords" size="21" maxlength="120"  placeholder="Search Here..." value="' . $search_value . '"><input autocomplete="off" type="submit" value="search" class="srcbutton" >';
+				?>
+			</form>
+			<div class="srcclear"></div>
+		</div>
+	</div>
+	<div class="holecontainer" style="float: right; margin-right: 36%; padding-top: 110px;">
+		<div class="container">
+			<div>
+				<div>
+					<div class="signupform_content">
+						<h2>Admin Login</h2>
+						<div class="signupform_text"></div>
+						<div>
+							<form action="" method="POST" class="registration">
+								<div class="signup_form">
+									<div>
+										<td>
+											<input autocomplete="off" name="email" placeholder="Enter Your Email" required="required" class="email signupbox" type="email" size="30" value="">
+										</td>
+									</div>
+									<div>
+										<td>
+											<input autocomplete="off" name="password" id="password-1" required="required" placeholder="Enter Password" class="password signupbox " type="password" size="30" value="">
+										</td>
+									</div>
+									<div>
+										<input autocomplete="off" name="login" class="uisignupbutton signupbutton" type="submit" value="Log In">
+									</div>
+									<div class="signup_error_msg">
+										<?php
+										if (isset($error_message)) {
+											echo $error_message;
+										}
+
+										?>
+									</div>
+								</div>
+							</form>
+
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+	<div style="clear:both"></div>
+	<hr>
+	<center id="google_translate_element"></ce>
+
+	<script type="text/javascript">
+		function googleTranslateElementInit() {
+			new google.translate.TranslateElement({
+				pageLanguage: 'en'
+			}, 'google_translate_element');
+		}
+	</script>
+
+	<script type="text/javascript" src="//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
+
+</body>
+
+</html>
